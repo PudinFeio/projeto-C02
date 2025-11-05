@@ -10,23 +10,128 @@ ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
 const int TAM_VETOR_USERS = 100;
 
-
 // STRUCTS //
 struct Usuarios{
     int id;
     string nome;
     string email;
     string senha;
-
 };
 
-
 // FUNÇÕES //
-void ciarConta(Usuarios users){
-    ARQ_ESCRITA.open("usuarios.txt", ofstream::out);
+int pegar_ultimoID(){
+    ifstream arq("usuarios.txt");
+    if(!arq.is_open()){
+        return 0;
+    }
 
+    int ultimoID = 0;
+    int idTemp;
+    string nome, email, senha;
 
-   
+    while(arq >> idTemp){
+        arq.ignore();
+        getline(arq, nome);
+        getline(arq, email);
+        getline(arq, senha);
+        ultimoID = idTemp;
+    }
+
+    arq.close();
+    return ultimoID;
+}
+
+bool email_ja_existe(string emailProcurado){
+    ifstream arq("usuarios.txt");
+    if(!arq.is_open()){
+        return false;
+    }
+
+    int id;
+    string nome, email, senha;
+
+    while(arq >> id){
+        arq.ignore();
+        getline(arq, nome);
+        getline(arq, email);
+        getline(arq, senha);
+
+        if(email == emailProcurado){
+            arq.close();
+            return true;
+        }
+    }
+
+    arq.close();
+    return false;
+}
+
+void criar_conta(Usuarios users[], int &total){
+    Usuarios usr;
+
+    // gerar id automaticamente
+    usr.id = pegar_ultimoID() + 1;
+
+    cout << "Nome: ";
+    getline(cin, usr.nome);
+
+    cout << "Email: ";
+    getline(cin, usr.email);
+
+    // valida se email já existe
+    if(email_ja_existe(usr.email)){
+        cout << "Este email ja esta cadastrado!" << endl;
+        return;
+    }
+
+    cout << "Senha: ";
+    getline(cin, usr.senha);
+
+    // salvar no vetor
+    users[total] = usr;
+    total++;
+
+    // salvar no arquivo de forma simples (append)
+    ARQ_ESCRITA.open("usuarios.txt", ios::app);
+    ARQ_ESCRITA << usr.id << endl;
+    ARQ_ESCRITA << usr.nome << endl;
+    ARQ_ESCRITA << usr.email << endl;
+    ARQ_ESCRITA << usr.senha << endl;
+    ARQ_ESCRITA.close();
+
+    cout << "Conta criada com sucesso!" << endl;
+}
+
+bool fazerLogin(Usuarios users[], int total){
+    string email, senha;
+
+    cout << "Email: ";
+    getline(cin, email);
+
+    cout << "Senha: ";
+    getline(cin, senha);
+
+    ARQ_LEITURA.open("usuarios.txt");
+
+    while(!ARQ_LEITURA.eof()){
+        int idFile;
+        string nomeFile, emailFile, senhaFile;
+
+        ARQ_LEITURA >> idFile;
+        ARQ_LEITURA.ignore();
+        getline(ARQ_LEITURA, nomeFile);
+        getline(ARQ_LEITURA, emailFile);
+        getline(ARQ_LEITURA, senhaFile);
+
+        if(emailFile == email && senhaFile == senha){
+            ARQ_LEITURA.close();
+            cout << "Bem vindo " << nomeFile << " !!!" << endl;
+            return true;
+        }
+    }
+
+    ARQ_LEITURA.close();
+    return false;
 }
 
 // FUNÇÃO MAIN //
@@ -36,21 +141,31 @@ int main(){
     int escolhaLogin;
 
     Usuarios users[TAM_VETOR_USERS];
+    int totalUsers = 0;
 
     while(desligar == true){
+        cout << "\n1 - Fazer login" << endl;
+        cout << "2 - Criar conta" << endl;
+        cout << "0 - Sair" << endl;
+        cout << "Escolha: ";
         cin >> escolhaLogin;
+        cin.ignore();
 
         switch (escolhaLogin)
         {
-        case 1: // Fazer login
-                
+        case 1:
+            if(fazerLogin(users, totalUsers)){
+                cout << "Login efetuado!" << endl;
+            }else{
+                cout << "Falha no login!" << endl;
+            }
             break;
 
-        case 2: // Criar conta
-            
-        break;
+        case 2:
+            criar_conta(users, totalUsers);
+            break;
 
-        case 0: // sair
+        case 0:
             desligar = false;
             break;
         
