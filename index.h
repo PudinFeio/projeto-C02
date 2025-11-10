@@ -28,11 +28,6 @@ struct Usuarios {
     string senha;
 };
 
-struct Nota {
-    string arquivo;
-    int tempo;
-};
-
 
 // FUNÇÕES //
 inline void limpar() {
