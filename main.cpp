@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -25,7 +27,15 @@ struct Usuarios{
 };
 
 // FUNÇÕES //
+#include <thread>
+#include <chrono>
 
+using namespace std;
+
+void limpar(){
+    this_thread::sleep_for(chrono::seconds(2));
+    system("clear");
+}
 
 // CRUD //
 int pegar_ultimoID(){
@@ -74,11 +84,13 @@ bool email_ja_existe(string emailProcurado){
     return false;
 }
 
-void criar_conta(Usuarios users[], int &total){
+bool criar_conta(Usuarios users[], int &total){
     Usuarios usr;
 
     // gerar id automaticamente
     usr.id = pegar_ultimoID() + 1;
+
+    system("clear");
 
     cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
     cout << "\nCrie sua conta" << endl;
@@ -92,7 +104,7 @@ void criar_conta(Usuarios users[], int &total){
     // valida se email já existe
     if(email_ja_existe(usr.email)){
         cout << "Este email ja esta cadastrado!" << endl;
-        return;
+        return false;
     }
 
     cout << "Senha: " << TXT_AMARELO;
@@ -111,18 +123,20 @@ void criar_conta(Usuarios users[], int &total){
     ARQ_ESCRITA << usr.senha << endl;
     ARQ_ESCRITA.close();
 
-    cout << TXT_VERDE << "\nConta criada com sucesso!" << TXT_BRANCO << endl;
+    return true;
 }
 
-bool fazerLogin(Usuarios users[], int total){
+bool fazer_login(Usuarios users[], int total){
     string email, senha;
 
+    system("clear");
+    
     cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
     cout << "\nFazendo login" << endl;
-    cout << "Nome: " << TXT_AMARELO;
+    cout << "Email: " << TXT_AMARELO;
     getline(cin, email);
     cout << TXT_BRANCO;
-    cout << "Email: " << TXT_AMARELO;
+    cout << "Senha: " << TXT_AMARELO;
     getline(cin, senha);
 
     ARQ_LEITURA.open("usuarios.txt");
@@ -138,7 +152,7 @@ bool fazerLogin(Usuarios users[], int total){
 
         if(emailFile == email && senhaFile == senha){
             ARQ_LEITURA.close();
-            cout << "Bem vindo " << nomeFile << " !!!" << endl;
+            cout << TXT_BRANCO "\nBem vindo " << TXT_AMARELO << nomeFile << TXT_BRANCO << " !!!" << endl;
             return true;
         }
     }
@@ -156,6 +170,8 @@ int main(){
     Usuarios users[TAM_VETOR_USERS];
     int totalUsers = 0;
 
+    system("clear");
+
     while(desligar == true){
         cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
         cout << "\n1 - Fazer login" << endl;
@@ -169,23 +185,39 @@ int main(){
         switch (escolhaLogin)
         {
         case 1:
-            if(fazerLogin(users, totalUsers)){
+            if(fazer_login(users, totalUsers)){
                 cout << TXT_VERDE << "\nLogin efetuado!" << TXT_BRANCO << endl;
+                limpar();
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
+                limpar();
             }
+
             break;
 
         case 2:
-            criar_conta(users, totalUsers);
+            if(criar_conta(users, totalUsers)){
+                cout << TXT_VERDE << "\nConta criada com sucesso!" << TXT_BRANCO << endl;
+                limpar();
+            }
+            else{
+                cout << TXT_VERMELHO << "\nErro ao criar conta!" << TXT_BRANCO << endl;
+                limpar();
+            }
+           
             break;
 
         case 0:
+            cout << TXT_AMARELO <<"Saindo..." << TXT_BRANCO;
             desligar = false;
+            limpar();
+            
             break;
         
         default:
             cout << "opção invalida!" << endl;
+            limpar();
+
             break;
         }
     }
