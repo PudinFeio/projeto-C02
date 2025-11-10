@@ -1,36 +1,13 @@
-// BIBLIOTECAS //
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <thread>
-#include <chrono>
+#include "index.h"
 
-using namespace std;
-
-// GLOBAL //
-#define TXT_VERMELHO "\033[31m"
-#define TXT_BRANCO "\033[0m"
-#define TXT_VERDE "\033[32m" 
-#define TXT_AMARELO "\033[33m"
-
+// GLOBAIS //
 ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
+
 const int TAM_VETOR_USERS = 100;
+const int MAX_NOTAS = 26;
 
-
-// STRUCTS //
-struct Usuarios{
-    int id;
-    string nome;
-    string email;
-    string senha;
-};
-
-// FUNÇÕES //
-void limpar(){
-    this_thread::sleep_for(chrono::seconds(2));
-    system("clear");
-}
+// // TOCAR NOTAS //
 
 // CRUD //
 int pegar_ultimoID(){
@@ -121,7 +98,7 @@ bool criar_conta(Usuarios users[], int &total){
     return true;
 }
 
-bool fazer_login(Usuarios users[], int total){
+bool fazer_login(Usuarios users[], string &nomeFile){
     string email, senha;
 
     system("clear");
@@ -137,7 +114,7 @@ bool fazer_login(Usuarios users[], int total){
     ARQ_LEITURA.open("usuarios.txt");
 
     int idFile;
-    string nomeFile, emailFile, senhaFile;
+    string emailFile, senhaFile;
 
     while(ARQ_LEITURA >> idFile){
         ARQ_LEITURA.ignore();
@@ -147,7 +124,8 @@ bool fazer_login(Usuarios users[], int total){
 
         if(emailFile == email && senhaFile == senha){
             ARQ_LEITURA.close();
-            cout << TXT_BRANCO "\nBem vindo " << TXT_AMARELO << nomeFile << TXT_BRANCO << " !!!" << endl;
+            cout << TXT_VERDE << "\nLogin efetuado!" << TXT_BRANCO << endl;
+            limpar();
             return true;
         }
     }
@@ -161,6 +139,7 @@ int main(){
 
     bool desligar = true; // desligar programa
     int escolhaLogin;
+    string nomeUser;
 
     Usuarios users[TAM_VETOR_USERS];
     int totalUsers = 0;
@@ -180,8 +159,8 @@ int main(){
         switch (escolhaLogin)
         {
         case 1:
-            if(fazer_login(users, totalUsers)){
-                cout << TXT_VERDE << "\nLogin efetuado!" << TXT_BRANCO << endl;
+            if(fazer_login(users, nomeUser)){
+                cout << TXT_BRANCO "\nBem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " !!!" << endl;
                 limpar();
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
