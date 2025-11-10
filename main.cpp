@@ -27,11 +27,6 @@ struct Usuarios{
 };
 
 // FUNÇÕES //
-#include <thread>
-#include <chrono>
-
-using namespace std;
-
 void limpar(){
     this_thread::sleep_for(chrono::seconds(2));
     system("clear");
@@ -215,7 +210,7 @@ int main(){
             break;
         
         default:
-            cout << "opção invalida!" << endl;
+            cout << "Opcao invalida!" << endl;
             limpar();
 
             break;
