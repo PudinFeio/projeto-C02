@@ -76,7 +76,7 @@ O programa também possui um sistema de autenticação simples com **login** e *
 ```
 ---
 
-## Compilação Linux ou Mac (indisponível para Windows)
+## Compilação Linux ou macOS (indisponível para Windows)
 
 - **g++ main.cpp -o MeloMix**
 - **./MeloMix**
