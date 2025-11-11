@@ -1,40 +1,11 @@
-// BIBLIOTECAS //
-#include <iostream>
-#include <string>
-#include <fstream>
+#include "main.h"
 
-using namespace std;
-
-// GLOBAL //
-#define TXT_VERMELHO "\033[31m"
-#define TXT_BRANCO "\033[0m"
-#define TXT_VERDE "\033[32m"
-#define TXT_AMARELO "\033[33m"
-
+// GLOBAIS //
 ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
 
-const int TAM_VETOR_USERS = 100;
 
-// STRUCTS //
-struct Usuarios {
-    int id;
-    string nome;
-    string email;
-    string senha;
-};
-
-// FUNÇÕES //
-void limpar() {
-    int i = 0; 
-    while(i < 999999999){
-        i++;
-    }
-    
-    system("clear");
-}
-
-// // TOCAR NOTAS //
+// TOCAR NOTAS //
 
 // CRUD //
 int pegar_ultimoID(){
