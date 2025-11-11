@@ -1,6 +1,6 @@
 # Projeto C02 — MELOMIX
 
-**Disciplina:** Algoritimos e Estrutura de Dados 2 (C02 — 2025)  
+**Disciplina:** Algoritimos e Estrutura de Dados 1 (C02 — 2025)  
 **Autores:** Bruna Pereira de Oliveira, Cassiano Eller Vitoriano Fonseca, Marlon Robert Mota Rosa  
 **Data:** 2025  
 
