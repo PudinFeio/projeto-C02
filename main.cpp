@@ -1,15 +1,15 @@
+// HEADER //
 #include "main.h"
 
 // GLOBAIS //
 ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
 
-
 // TOCAR NOTAS //
 
 // CRUD //
 int pegar_ultimoID(){
-    ifstream arq("usuarios.txt");
+    ifstream arq(NOME_ARQUIVO);
 
     if(!arq.is_open()){
         return 0;
@@ -19,7 +19,7 @@ int pegar_ultimoID(){
     int idTemp;
     string nome, email, senha;
 
-    while(arq >> idTemp){
+    while(arq >> idTemp){   // Pega os dados do usuário e armazeno o id;
         getline(arq, nome);
         getline(arq, email);
         getline(arq, senha);
@@ -27,11 +27,12 @@ int pegar_ultimoID(){
     }
 
     arq.close();
-    return ultimoID;
+    return ultimoID + 1;
 }
 
 bool email_ja_existe(string emailProcurado){
-    ifstream arq("usuarios.txt");
+    ifstream arq(NOME_ARQUIVO);
+
     if(!arq.is_open()){
         return false;
     }
@@ -39,12 +40,12 @@ bool email_ja_existe(string emailProcurado){
     int id;
     string nome, email, senha;
 
-    while(arq >> id){
+    while(arq >> id){   // Pega todos os usuários
         getline(arq, nome);
         getline(arq, email);
         getline(arq, senha);
 
-        if(email == emailProcurado){
+        if(email == emailProcurado){    // Verifica se o email existe
             arq.close();
             return true;
         }
@@ -57,8 +58,7 @@ bool email_ja_existe(string emailProcurado){
 bool criar_conta(Usuarios users[], int &total){
     Usuarios usr;
 
-    // gerar id automaticamente
-    usr.id = pegar_ultimoID() + 1;
+    usr.id = pegar_ultimoID();  //Gera id automaticamente
 
     system("clear");
 
@@ -71,8 +71,7 @@ bool criar_conta(Usuarios users[], int &total){
     getline(cin, usr.email);
     cout << TXT_BRANCO;
 
-    // valida se email já existe
-    if(email_ja_existe(usr.email)){
+    if(email_ja_existe(usr.email)){     // Valida se email já existe
         cout << "Este email ja esta cadastrado!" << endl;
         return false;
     }
@@ -81,8 +80,7 @@ bool criar_conta(Usuarios users[], int &total){
     getline(cin, usr.senha);
     cout << TXT_BRANCO;
 
-    // salvar no vetor
-    users[total] = usr;
+    users[total] = usr; // salvar o user no vetor na posição total;
     total++;
 
     // salvar no arquivo
@@ -114,15 +112,15 @@ bool fazer_login(Usuarios users[], string &nomeFile){
     int idFile;
     string emailFile, senhaFile;
 
-    while(ARQ_LEITURA >> idFile){
+    while(ARQ_LEITURA >> idFile){   // Pega todos os usuários
         ARQ_LEITURA.ignore();
         getline(ARQ_LEITURA, nomeFile);
         getline(ARQ_LEITURA, emailFile);
         getline(ARQ_LEITURA, senhaFile);
 
-        if(emailFile == email && senhaFile == senha){
+        if(emailFile == email && senhaFile == senha){   // Verifica se o email e senha batem
             ARQ_LEITURA.close();
-            cout << TXT_VERDE << "\nLogin efetuado!" << TXT_BRANCO << endl;
+            cout << TXT_VERDE << "\nLogin efetuado com " << TXT_AZUL << "sucesso!" << TXT_BRANCO << endl;
             limpar();
             return true;
         }
@@ -135,7 +133,7 @@ bool fazer_login(Usuarios users[], string &nomeFile){
 // FUNÇÃO MAIN //
 int main(){
 
-    bool desligar = true; // desligar programa
+    bool desligar = true; // Desligar programa
     int escolhaLogin;
     string nomeUser;
 
@@ -180,14 +178,14 @@ int main(){
             break;
 
         case 0:
-            cout << TXT_AMARELO <<"Saindo..." << TXT_BRANCO;
+            cout << TXT_AMARELO <<" Saindo..." << TXT_BRANCO << endl;
             desligar = false;
             limpar();
             
             break;
         
         default:
-            cout << "Opcao invalida!" << endl;
+            cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
             limpar();
 
             break;
