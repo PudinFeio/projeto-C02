@@ -32,7 +32,7 @@ O aplicativo tem como objetivo permitir que o usuário, por meio do terminal, vi
 - **Nome da aplicação:** MeloMix  
 - **Tema:** Catálogo de partituras e notas musicais de instrumentos  
 - **Linguagem:** C++  
-- **Ambiente alvo:** Linux / macOS (compatível com ajustes para Windows)
+- **Ambiente alvo:** Linux / macOS (indisponível para Windows)
 
 ---
 
