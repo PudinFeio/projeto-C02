@@ -1,7 +1,7 @@
 # Projeto C02 — MELOMIX
 
 **Disciplina:** Algoritimos e Estrutura de Dados 1 (C02 — 2025)  
-**Autores:** Bruna Pereira de Oliveira, Cassiano Eller Vitoriano Fonseca, Marlon Robert Mota Rosa  
+**Autores:** Cassiano Eller Vitoriano Fonseca, Marlon Robert Mota Rosa  
 **Data:** 2025  
 
 ---
@@ -40,9 +40,8 @@ O aplicativo tem como objetivo permitir que o usuário, por meio do terminal, vi
 
 | Integrante | Função |
 |-------------|--------|
-| **Bruna Pereira de Oliveira** | Desenvolvimento do sistema de login e registro de usuários |
 | **Cassiano Eller Vitoriano Fonseca** | Integração dos módulos, controle de execução e implementação do sistema de saída de som |
-| **Marlon Robert Mota Rosa** | Programação da leitura dos arquivos de partituras e notas dos instrumentos |
+| **Marlon Robert Mota Rosa** | Programação da leitura dos arquivos de partituras e notas dos instrumentos, desenvolvimento do sistema de login e registro de usuários |
 
 ---
 
