@@ -283,11 +283,11 @@ int main(){
         case 1:
             if(fazer_login(users, nomeUser)){
                 limpar();
-                
+
                 cout << TXT_BRANCO "\n   === Bem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   " << endl;
 
                 char opcaoMusica;
-                do {
+                while(opcaoMusica != '0') {
                     cout << "\n=== MENU DE MÚSICA ===\n";
                     cout << "1 - Tocar notas livremente\n";
                     cout << "2 - Tocar música pronta (Brilha Brilha Estrelinha)\n";
@@ -309,7 +309,7 @@ int main(){
                             cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
                             usleep(800000);
                     }
-                } while(opcaoMusica != '0');
+                }
 
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
