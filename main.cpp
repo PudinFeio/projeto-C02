@@ -4,9 +4,8 @@
 #include <fstream> // Leitura e escrita de arquivos
 #include <unistd.h> // Fornece o sleep() -- biblioteca apenas para mac e linux
 #include <cstdlib> // Fornece o system()
-#include <filesystem> // Para iterar arquivos .wav
+
 using namespace std;
-namespace fs = std::filesystem;
 
 // CORES UNIX//
 #define TXT_VERMELHO "\033[31m"
@@ -32,106 +31,6 @@ struct Usuarios {
 };
 
 // TOCAR MÚSICA //
-
-
-void tocarSom(const string &arquivo){ // Toca O som via aplay
-    string cmd = "aplay -q \"" + arquivo + "\" &";
-
-    system(cmd.c_str());
-}
-
-struct Nota {
-    string arquivo;
-    int tempo; // milissegundos
-};
-
-// Tocar música
-void tocarMusica(Nota musica[], int tamanho){
-    for(int i = 0; i < tamanho; i++){
-        tocarSom(musica[i].arquivo);
-        usleep(musica[i].tempo * 1000); // ms → microseconds
-    }
-}
-
-int carregarAcordes(const string &pasta, string arquivos[], string nomes[]){ // Carregar arquivos WAV
-    int total = 0;
-
-    for(const auto &entry : fs::directory_iterator(pasta)){
-        if(entry.path().extension() == ".wav"){
-            arquivos[total] = entry.path().string();
-            nomes[total] = entry.path().stem().string();
-            total++;
-            if(total >= MAX_NOTAS) break;
-        }
-    }
-    return total;
-}
-
-void mostrarNotas(char teclas[], string nomes[], int total){ // Mostrar notas
-    cout << "\n=== Teclado de Violão ===\n";
-
-    for(int i = 0; i < total; i++){
-        cout << teclas[i] << " - " << nomes[i] << "\n";
-    }
-    cout << "\n0 - Voltar\n";
-}
-
-// Modo tocar notas livremente
-void modoTocarNotas(string arquivos[], string nomes[], int total){
-    char teclas[MAX_NOTAS];
-
-    for(int i = 0; i < total; i++)
-        teclas[i] = 'A' + i;
-
-    system("clear");
-    mostrarNotas(teclas, nomes, total);
-
-    cout << "\nDigite letras A-Z e pressione ENTER para tocar.\n";
-    cout << "Digite 0 e ENTER para voltar.\n";
-
-    char tecla;
-    while(true){
-        cout << "\nNota: ";
-        cin >> tecla;
-
-        if(tecla == '0'){
-            break;
-        }
-        tecla = toupper(tecla);
-
-        for(int i = 0; i < total; i++){
-            if(tecla == teclas[i]){
-                tocarSom(arquivos[i]);
-            }
-        }
-    }
-}
-
-void modoTocarMusica(const string& pasta){ // Músicas prontas
-    Nota brilha[] = {
-        {pasta+"/do.wav",275},{pasta+"/do.wav",275},
-        {pasta+"/sol.wav",275},{pasta+"/sol.wav",275},
-        {pasta+"/la.wav",275},{pasta+"/la.wav",275},
-        {pasta+"/sol.wav",525},{pasta+"/fa.wav",275},
-        {pasta+"/fa.wav",275},{pasta+"/mi.wav",275},
-        {pasta+"/mi.wav",275},{pasta+"/re.wav",275},
-        {pasta+"/re.wav",275},{pasta+"/do.wav",525}
-    };
-    int tamanho = sizeof(brilha)/sizeof(brilha[0]);
-
-    char opc;
-    do {
-        cout << "\n1 - Brilha Brilha Estrelinha\n";
-        cout << "0 - Voltar\n";
-        cout << "Escolha: ";
-        cin >> opc;
-
-        if(opc == '1'){
-            cout << "\nTocando...\n";
-            tocarMusica(brilha, tamanho);
-        }
-    } while(opc != '0');
-}
 
 // FUNÇÕES EXISTENTES //
 void limpar() {
@@ -251,7 +150,7 @@ bool fazer_login(Usuarios users[], string &nomeFile){
     return false;
 }
 
-// ==================== MAIN ====================
+//  MAIN //
 int main(){
 
     bool desligar = true; 
@@ -266,7 +165,6 @@ int main(){
     const string pastaAcordes = "acordes-violao";
     string arquivos[MAX_NOTAS];
     string nomes[MAX_NOTAS];
-    int totalNotas = carregarAcordes(pastaAcordes, arquivos, nomes);
 
     while(desligar){
         cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
@@ -278,38 +176,16 @@ int main(){
         cout << "\n" << TXT_BRANCO;
         cin.ignore();
 
-        switch (escolhaLogin)
-        {
+        string path = "/home/eller/Projects/projeto-C02/acordes-violao/do.wav";
+        std::string command = "xdg-open \"" + path + "\"";
+
+        switch (escolhaLogin){
+
         case 1:
             if(fazer_login(users, nomeUser)){
                 limpar();
 
                 cout << TXT_BRANCO "\n   === Bem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   " << endl;
-
-                char opcaoMusica;
-                while(opcaoMusica != '0') {
-                    cout << "\n=== MENU DE MÚSICA ===\n";
-                    cout << "1 - Tocar notas livremente\n";
-                    cout << "2 - Tocar música pronta (Brilha Brilha Estrelinha)\n";
-                    cout << "0 - Voltar\n";
-                    cout << "Escolha: ";
-                    cin >> opcaoMusica;
-                    cin.ignore();
-
-                    switch(opcaoMusica){
-                        case '1':
-                            modoTocarNotas(arquivos, nomes, totalNotas);
-                            break;
-                        case '2':
-                            modoTocarMusica(pastaAcordes);
-                            break;
-                        case '0':
-                            break;
-                        default:
-                            cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
-                            usleep(800000);
-                    }
-                }
 
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
@@ -332,12 +208,27 @@ int main(){
             desligar = false;
             limpar();
             break;
+        
+        case 4:
+             cout << "Musica: " << endl;
+                
+            int result = system(command.c_str());
+
+            if(result == 0){
+                cout << "Certo";
+            }else {
+                cout << "Errado";
+            }
+
+            break;
+           
 
         default:
             cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
             limpar();
             break;
         }
+    
     }
 
     return 0;
