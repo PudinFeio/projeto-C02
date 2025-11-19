@@ -19,8 +19,11 @@ ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
 
 const string USERS_DB  = "usuarios.txt";
+const string VIOLAO_DIRETORIO = "melodias/acordes-violao";
 const int TAM_VETOR_USERS = 100;
 const int MAX_NOTAS = 26;
+string PATH;
+
 
 // STRUCTS //
 struct Usuarios {
@@ -30,7 +33,30 @@ struct Usuarios {
     string senha;
 };
 
+string command = "xdg-open \"" + PATH + "\"";
+
 // TOCAR MÚSICA //
+void escolha_melodia(bool &voltar, int selecao){
+    
+
+    if(selecao == 1){
+        PATH = "/home/eller/Projects/projeto-C02/acordes-violao/";
+        cout  << "oi" << endl;
+
+    }
+    else if(selecao == 2){
+        PATH = "/home/eller/Projects/projeto-C02/notas-piano/";
+
+    }
+    else if(selecao == 3){
+        PATH = "/home/eller/Projects/projeto-C02/musicas/";
+
+    }
+    else{
+        voltar = true;  
+        cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
+    }
+}
 
 // FUNÇÕES EXISTENTES //
 void limpar() {
@@ -153,7 +179,7 @@ bool fazer_login(Usuarios users[], string &nomeFile){
 //  MAIN //
 int main(){
 
-    bool desligar = true; 
+    bool desligar = false; 
     int escolhaLogin;
     string nomeUser;
 
@@ -166,7 +192,7 @@ int main(){
     string arquivos[MAX_NOTAS];
     string nomes[MAX_NOTAS];
 
-    while(desligar){
+    while(desligar != true){
         cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
         cout << "\n1 - Fazer login" << endl;
         cout << "2 - Criar conta" << endl;
@@ -176,16 +202,28 @@ int main(){
         cout << "\n" << TXT_BRANCO;
         cin.ignore();
 
-        string path = "/home/eller/Projects/projeto-C02/acordes-violao/do.wav";
-        std::string command = "xdg-open \"" + path + "\"";
-
         switch (escolhaLogin){
 
         case 1:
             if(fazer_login(users, nomeUser)){
                 limpar();
 
-                cout << TXT_BRANCO "\n   === Bem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   " << endl;
+                bool voltar = false;
+
+                while (voltar != true ){
+                    int selecao;
+                    cout << TXT_BRANCO "\n   === Bem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   " << endl;
+                    cout << "1 - Acordes de violão" << endl;
+                    cout << "2 - Notas de piano" << endl;
+                    cout << "3 - musicas : " << endl;
+                    cout << "0 - Sair: " << TXT_AMARELO << endl;
+                    cin >> selecao;
+                    cout << "\n" << TXT_BRANCO;
+                    cin.ignore();
+
+                    escolha_melodia(voltar, selecao);
+                  
+                }
 
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
@@ -208,20 +246,6 @@ int main(){
             desligar = false;
             limpar();
             break;
-        
-        case 4:
-             cout << "Musica: " << endl;
-                
-            int result = system(command.c_str());
-
-            if(result == 0){
-                cout << "Certo";
-            }else {
-                cout << "Errado";
-            }
-
-            break;
-           
 
         default:
             cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
