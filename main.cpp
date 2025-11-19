@@ -18,10 +18,10 @@ using namespace std;
 ofstream ARQ_ESCRITA;
 ifstream ARQ_LEITURA;
 
-const string USERS_DB  = "usuarios.txt";
-const string VIOLAO_DIRETORIO = "melodias/acordes-violao";
 const int TAM_VETOR_USERS = 100;
 const int MAX_NOTAS = 26;
+const string USERS_DB  = "usuarios.txt";
+const string VIOLAO_DIRETORIO = "melodias/acordes-violao/";
 string PATH;
 
 
@@ -52,9 +52,12 @@ void escolha_melodia(bool &voltar, int selecao){
         PATH = "/home/eller/Projects/projeto-C02/musicas/";
 
     }
+    else if(selecao == 0){
+        voltar = true;
+    }
     else{
-        voltar = true;  
         cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
+        limpar();
     }
 }
 
@@ -206,13 +209,11 @@ int main(){
 
         case 1:
             if(fazer_login(users, nomeUser)){
-                limpar();
 
                 bool voltar = false;
-
                 while (voltar != true ){
                     int selecao;
-                    cout << TXT_BRANCO "\n   === Bem vindo " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   " << endl;
+                    cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
                     cout << "1 - Acordes de violão" << endl;
                     cout << "2 - Notas de piano" << endl;
                     cout << "3 - musicas : " << endl;
@@ -228,6 +229,7 @@ int main(){
             }else{
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
                 limpar();
+                break;
             }
             break;
 
