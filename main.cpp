@@ -47,23 +47,55 @@ void limpar(int a) {
 }
 
 // TOCAR MÚSICA //
-void tocar_melodia(int escolha, Melodias &melo) {
-    if (melo.quantidade == 0) {
-        cout << "Nenhum arquivo encontrado!" << endl;
-        return;
+void tocar_melodia(Melodias melo) {
+    int escolha;
+    bool voltar = false;
+
+    while(!voltar){
+        limpar(1);
+         
+        if (melo.quantidade == 0) {
+            cout << "Nenhum arquivo encontrado!" << endl;
+            return;
+        }
+
+        cout << "\n   === Digite um dos números para reproduzir a melodia ===   \n\n";
+
+        int cont = 1;
+        for(int i = 0; i < melo.quantidade; i++) {
+            cout << cont << " - " << melo.arquivos[i] << endl;
+
+            if (i == melo.quantidade){
+                    cout << "0 - Sair" << endl;
+                }
+            cont++;
+
+            }
+
+        cout << "Escolha: " << TXT_AMARELO;
+        cin >> escolha;
+        cout << TXT_BRANCO;
+
+
+        if (escolha < 0 || escolha > melo.quantidade) {
+            cout << TXT_VERMELHO << "\nOpção inválida!" << TXT_BRANCO << endl;
+            limpar(2);
+            return;
+        }
+
+        if(escolha == 0){
+            voltar == false;
+            limpar(1);
+            return;
+        }
+
+        // monta caminho completo
+        string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1];
+
+        // toca o arquivo usando o player padrão do sistema
+        string comando = "xdg-open \"" + caminhoCompleto + "\"";
+        system(comando.c_str());
     }
-
-    if (escolha < 1 || escolha > melo.quantidade) {
-        cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
-        return;
-    }
-
-    // monta caminho completo
-    string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1];
-
-    // toca o arquivo usando o player padrão do sistema
-    string comando = "xdg-open \"" + caminhoCompleto + "\"";
-    system(comando.c_str());
 }
 
 void abrir_diretorio(Melodias &dirInfo, const string &path) {
@@ -98,34 +130,24 @@ void abrir_diretorio(Melodias &dirInfo, const string &path) {
 }
 
 void escolha_melodia(bool &voltar, int selecao){
+        Melodias toques;
+
     switch (selecao){
+
         case 1: {
-            Melodias toques;
-            PATH = "/mnt/c/Users/Eller/Desktop/projects/projeto-C02/melodias/acordes-violao/";
-            int escolha;
-
-            limpar(1);
-
-            cout << "\n   === Digite um dos números para reproduzir a melodia ===   \n\n";
-                
+            PATH = "melodias/acordes-violao/";
+       
             abrir_diretorio(toques, PATH);
-
-            for (int i = 1; i < toques.quantidade; i++) {
-                cout << i << " - " << toques.arquivos[i] << endl;
-                if (i == 11){
-                    cout << "0 - Sair" << endl;
-                }
-            }
-
-            cout << "Escolha: " << TXT_AMARELO;
-            cin >> escolha;
-            cout << TXT_BRANCO;
-
-            tocar_melodia(escolha, toques);
+            tocar_melodia(toques);
+            
             break;
         }
         case 2:
-            PATH = "/home/eller/Projects/projeto-C02/melodias/notas-piano/";
+           PATH = "melodias/notas-piano/";
+       
+            abrir_diretorio(toques, PATH);
+            tocar_melodia(toques);
+            
             break;
 
         case 3:
@@ -245,8 +267,6 @@ bool fazer_login(Usuarios users[], string &nomeFile){
             ARQ_LEITURA.close();
             cout << TXT_VERDE << "\nLogin efetuado com " << TXT_VERDE << "sucesso!" << TXT_BRANCO << endl;
 
-            limpar(2);
-
             return true;
         }
     }
@@ -285,8 +305,9 @@ int main(){
 
         case 1:
             if(fazer_login(users, nomeUser)){
-
+                limpar(1);
                 bool voltar = false;
+
                 while (!voltar ){
                     int selecao;
                     cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
@@ -299,10 +320,10 @@ int main(){
                     cout << "\n" << TXT_BRANCO;
                     cin.ignore();
 
-                    if(selecao == 0){
+                    if(selecao < 1){
+                        limpar(1);
                         break;
                     }
-
                     escolha_melodia(voltar, selecao);
                 }
 
