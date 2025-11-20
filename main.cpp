@@ -4,6 +4,9 @@
 #include <fstream> // Leitura e escrita de arquivos
 #include <unistd.h> // Fornece o sleep() -- biblioteca apenas para mac e linux
 #include <cstdlib> // Fornece o system()
+#include <dirent.h> // Interação com diretórios
+#include <cstring> // strcpy
+#include <sys/types.h>
 
 using namespace std;
 
@@ -21,9 +24,7 @@ ifstream ARQ_LEITURA;
 const int TAM_VETOR_USERS = 100;
 const int MAX_NOTAS = 26;
 const string USERS_DB  = "usuarios.txt";
-const string VIOLAO_DIRETORIO = "melodias/acordes-violao/";
 string PATH;
-
 
 // STRUCTS //
 struct Usuarios {
@@ -33,40 +34,115 @@ struct Usuarios {
     string senha;
 };
 
-string command = "xdg-open \"" + PATH + "\"";
-
-// TOCAR MÚSICA //
-void escolha_melodia(bool &voltar, int selecao){
-    
-
-    if(selecao == 1){
-        PATH = "/home/eller/Projects/projeto-C02/acordes-violao/";
-        cout  << "oi" << endl;
-
-    }
-    else if(selecao == 2){
-        PATH = "/home/eller/Projects/projeto-C02/notas-piano/";
-
-    }
-    else if(selecao == 3){
-        PATH = "/home/eller/Projects/projeto-C02/musicas/";
-
-    }
-    else if(selecao == 0){
-        voltar = true;
-    }
-    else{
-        cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
-        limpar();
-    }
-}
+struct Melodias {
+    string caminho;
+    char arquivos[100][256];
+    int quantidade;
+};
 
 // FUNÇÕES EXISTENTES //
-void limpar() {
-    sleep(2);
+void limpar(int a) {
+    sleep(a);
     system("clear");
 }
 
+// TOCAR MÚSICA //
+void tocar_melodia(int escolha, Melodias &melo) {
+    if (melo.quantidade == 0) {
+        cout << "Nenhum arquivo encontrado!" << endl;
+        return;
+    }
+
+    if (escolha < 1 || escolha > melo.quantidade) {
+        cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
+        return;
+    }
+
+    // monta caminho completo
+    string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1];
+
+    // toca o arquivo usando o player padrão do sistema
+    string comando = "xdg-open \"" + caminhoCompleto + "\"";
+    system(comando.c_str());
+}
+
+void abrir_diretorio(Melodias &dirInfo, const string &path) {
+    DIR *dir;
+    struct dirent *entrada;
+
+    dirInfo.caminho = path;
+    dirInfo.quantidade = 0;
+
+    dir = opendir(path.c_str());
+    if (!dir) {
+        cout << "Erro ao abrir o diretorio: " << path << endl;
+        return;
+    }
+
+    while ((entrada = readdir(dir)) != NULL) {
+        const char *nome = entrada->d_name;
+
+        if (strcmp(nome, ".") == 0 || strcmp(nome, "..") == 0)  // Ignora "." e ".."
+            continue;
+
+        if (dirInfo.quantidade < 100) {
+            strcpy(dirInfo.arquivos[dirInfo.quantidade], nome);
+            dirInfo.quantidade++;
+        } else {
+            cout << "Limite de arquivos atingido!" << endl;
+            break;
+        }
+    }
+
+    closedir(dir);
+}
+
+void escolha_melodia(bool &voltar, int selecao){
+    switch (selecao){
+        case 1: {
+            Melodias toques;
+            PATH = "/mnt/c/Users/Eller/Desktop/projects/projeto-C02/melodias/acordes-violao/";
+            int escolha;
+
+            limpar(1);
+
+            cout << "\n   === Digite um dos números para reproduzir a melodia ===   \n\n";
+                
+            abrir_diretorio(toques, PATH);
+
+            for (int i = 1; i < toques.quantidade; i++) {
+                cout << i << " - " << toques.arquivos[i] << endl;
+                if (i == 11){
+                    cout << "0 - Sair" << endl;
+                }
+            }
+
+            cout << "Escolha: " << TXT_AMARELO;
+            cin >> escolha;
+            cout << TXT_BRANCO;
+
+            tocar_melodia(escolha, toques);
+            break;
+        }
+        case 2:
+            PATH = "/home/eller/Projects/projeto-C02/melodias/notas-piano/";
+            break;
+
+        case 3:
+            PATH = "/home/eller/Projects/projeto-C02/melodias/musica/";
+            break;
+
+        case 0:
+            voltar = true;
+            break;
+
+        default:
+            cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
+            limpar(2);
+    }
+}
+
+// CRUD //
 int pegar_ultimoID(){
     ARQ_LEITURA.open(USERS_DB, ofstream::in);
 
@@ -167,9 +243,9 @@ bool fazer_login(Usuarios users[], string &nomeFile){
         getline(ARQ_LEITURA, senhaFile);
         if(emailFile == email && senhaFile == senha){
             ARQ_LEITURA.close();
-            cout << TXT_VERDE << "\nLogin efetuado com " << TXT_AZUL << "sucesso!" << TXT_BRANCO << endl;
+            cout << TXT_VERDE << "\nLogin efetuado com " << TXT_VERDE << "sucesso!" << TXT_BRANCO << endl;
 
-            limpar();
+            limpar(2);
 
             return true;
         }
@@ -179,7 +255,7 @@ bool fazer_login(Usuarios users[], string &nomeFile){
     return false;
 }
 
-//  MAIN //
+// MAIN //
 int main(){
 
     bool desligar = false; 
@@ -195,7 +271,7 @@ int main(){
     string arquivos[MAX_NOTAS];
     string nomes[MAX_NOTAS];
 
-    while(desligar != true){
+    while(!desligar){
         cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
         cout << "\n1 - Fazer login" << endl;
         cout << "2 - Criar conta" << endl;
@@ -211,47 +287,54 @@ int main(){
             if(fazer_login(users, nomeUser)){
 
                 bool voltar = false;
-                while (voltar != true ){
+                while (!voltar ){
                     int selecao;
                     cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
                     cout << "1 - Acordes de violão" << endl;
                     cout << "2 - Notas de piano" << endl;
-                    cout << "3 - musicas : " << endl;
-                    cout << "0 - Sair: " << TXT_AMARELO << endl;
+                    cout << "3 - musicas" << endl;
+                    cout << "0 - Sair " << TXT_AMARELO << endl;
+                    cout << TXT_BRANCO << "Escolha: " << TXT_AMARELO;
                     cin >> selecao;
                     cout << "\n" << TXT_BRANCO;
                     cin.ignore();
 
+                    if(selecao == 0){
+                        break;
+                    }
+
                     escolha_melodia(voltar, selecao);
-                  
                 }
 
-            }else{
+            } else {
                 cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
-                limpar();
+                limpar(2);
                 break;
             }
+
             break;
 
         case 2:
             if(criar_conta(users, totalUsers)){
                 cout << TXT_VERDE << "\nConta criada com sucesso!" << TXT_BRANCO << endl;
-                limpar();
+                limpar(2);
             } else {
                 cout << TXT_VERMELHO << "\nErro ao criar conta!" << TXT_BRANCO << endl;
-                limpar();
+                limpar(2);
+                break;
             }
+
             break;
 
         case 0:
             cout << TXT_AMARELO <<" Saindo..." << TXT_BRANCO << endl;
-            desligar = false;
-            limpar();
+            desligar = true;
+            limpar(1);
             break;
 
         default:
             cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
-            limpar();
+            limpar(2);
             break;
         }
     
