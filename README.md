@@ -1,6 +1,6 @@
 # Projeto C02 — MELOMIX
 
-**Disciplina:** Algoritimos e Estrutura de Dados 1 (C02 — 2025)  
+**Disciplina:** Algoritmos e Estrutura de Dados 1 (C02 — 2025)  
 **Autores:** Cassiano Eller Vitoriano Fonseca, Marlon Robert Mota Rosa  
 **Data:** 2025  
 
@@ -14,16 +14,13 @@
 4. [Resumo (Abstract)](#4-resumo-abstract)  
 5. [Funcionalidades](#5-funcionalidades)  
 6. [Estrutura do Projeto](#6-estrutura-do-projeto)  
-7. [Compilação Linux ou Mac](#7-compilação-linux-ou-mac-indisponível-para-windows)  
-8. [Requisitos Mínimos](#8-requisitos-mínimos)  
-9. [Licença](#9-licença)  
 
 ---
 
 ## 1. Visão Geral
 
 **MELOMIX** é um projeto desenvolvido para a matéria **C02 (Programação em C++) — 2025**.  
-O aplicativo tem como objetivo permitir que o usuário, por meio do terminal, visualize e ouça notas musicais de instrumentos específicos, além de oferecer um sistema de **login** e **criação de contas** para acesso ao catálogo de partituras.
+O aplicativo permite que o usuário, através do terminal, visualize e ouça notas musicais de instrumentos específicos, além de oferecer um sistema de **login** e **criação de contas** para acesso personalizado ao catálogo de partituras.
 
 ---
 
@@ -40,7 +37,7 @@ O aplicativo tem como objetivo permitir que o usuário, por meio do terminal, vi
 
 | Integrante | Função |
 |-------------|--------|
-| **Cassiano Eller Vitoriano Fonseca** | Integração dos módulos, controle de execução e implementação do sistema de saída de som |
+| **Cassiano Eller Vitoriano Fonseca** | Integração dos módulos, controle de execução e implementação do sistema de reprodução de som |
 | **Marlon Robert Mota Rosa** | Programação da leitura dos arquivos de partituras e notas dos instrumentos, desenvolvimento do sistema de login e registro de usuários |
 
 ---
@@ -48,7 +45,7 @@ O aplicativo tem como objetivo permitir que o usuário, por meio do terminal, vi
 ## 4. Resumo (Abstract)
 
 O **MeloMix** é um aplicativo terminal feito em **C++** com o intuito de apresentar ao usuário notas musicais de diferentes instrumentos, permitindo que o som correspondente seja reproduzido.  
-O programa também possui um sistema de autenticação simples com **login** e **criação de conta**, garantindo uma experiência personalizada para cada usuário.  
+O programa possui autenticação simples com **login** e **criação de conta**, garantindo uma experiência personalizada para cada usuário.
 
 ---
 
@@ -59,7 +56,7 @@ O programa também possui um sistema de autenticação simples com **login** e *
 - **Persistência de dados:** armazenamento local em arquivo texto (`usuarios.txt`).  
 - **Interface colorida:** saída colorida no terminal com códigos ANSI.  
 - **Limpeza automática de tela:** pausa e limpeza de tela após ações importantes.  
-- **Módulo de som (em desenvolvimento):** reprodução de notas musicais a partir de arquivos de partitura.
+- **Reprodução de melodias:** execução de arquivos de som utilizando o comando `xdg-open` no Linux/macOS.
 
 ---
 
@@ -68,14 +65,17 @@ O programa também possui um sistema de autenticação simples com **login** e *
 ```bash
 ├── projeto-C02/
 ├── main.cpp        # Código principal do programa (funções e menu)
-├── main.h          # Cabeçalho com bibliotecas, definições e structs
 ├── usuarios.txt    # Arquivo de armazenamento de dados (gerado automaticamente)
+├── melodias/       # Diretórios de melodias e partituras
+│   ├── acordes-violao/
+│   ├── notas-piano/
+│   └── musica/
 ├── output/         # Diretório opcional para o executável
 └── README.md       # Documentação do projeto
-```
----
 
-## Compilação Linux ou macOS (indisponível para Windows)
+   === BEM VINDO AO MELOMIX ===   
 
-- **g++ main.cpp -o MeloMix**
-- **./MeloMix**
+1 - Fazer login
+2 - Criar conta
+0 - Sair
+Escolha: 1
