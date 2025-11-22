@@ -1,16 +1,17 @@
 // BIBLIOTECAS //
 #include <iostream> // Entrada e saida de dados
+#include <iomanip> // Manipulador de entrada e saída de dados
 #include <string>   // Tipo string
 #include <fstream> // Leitura e escrita de arquivos
-#include <unistd.h> // Fornece o sleep() -- biblioteca apenas para mac e linux
-#include <cstdlib> // Fornece o system()
+#include <unistd.h> // Fornece o sleep() e outras funções para interação com o terminal
+#include <cstdlib> // Permite enviar comandos para o terminal através do system()
 #include <dirent.h> // Interação com diretórios
-#include <cstring> // strcpy
-#include <sys/types.h>
+#include <cstring> // Manipulador de Strings
+#include <sys/types.h> // Biblioteca C que define tipos de dados usados pelo sistema operacional Linux/mac
 
 using namespace std;
 
-// CORES UNIX//
+// CORES UNIX //
 #define TXT_VERMELHO "\033[31m"
 #define TXT_BRANCO "\033[0m"
 #define TXT_VERDE "\033[32m"
@@ -51,9 +52,11 @@ void tocar_melodia(Melodias melo) {
     int escolha;
     bool voltar = false;
 
-    while(!voltar){
+    const int LINHAS = 8;
+
+    while (!voltar) {
         limpar(1);
-         
+
         if (melo.quantidade == 0) {
             cout << "Nenhum arquivo encontrado!" << endl;
             return;
@@ -61,63 +64,98 @@ void tocar_melodia(Melodias melo) {
 
         cout << "\n   === Digite um dos números para reproduzir a melodia ===   \n\n";
 
-        int cont = 1;
-        for(int i = 0; i < melo.quantidade; i++) {
-            cout << cont << " - " << melo.arquivos[i] << endl;
+        int total = melo.quantidade; // Armazena o total de arquivos encontrados no diretório
+        int COLUNAS = (total + LINHAS - 1) / LINHAS; // calcula quantas colunas serão necessárias para distribuir os arquivos igualmente
 
-            if (i == melo.quantidade){
-                    cout << "0 - Sair" << endl;
+        string *matriz = new string[LINHAS * COLUNAS]; // Cria dinamicamente uma matriz unidimensional que representará a grade de arquivos exibidos
+
+        int index = 0;
+
+        for (int c = 0; c < COLUNAS; c++) { // Percorre cada coluna para preencher a matriz visual com os nomes dos arquivos
+            for (int l = 0; l < LINHAS; l++) {
+                int pos = l * COLUNAS + c;
+
+                if (index < total) { // Verifica se ainda há arquivos para serem listados
+                    matriz[pos] = to_string(index + 1) + " - " + melo.arquivos[index];
+                    index++;
+                } else {
+                    matriz[pos] = ""; // Insere espaço vazio caso não haja mais arquivos disponíveis para preencher a grade
                 }
-            cont++;
-
             }
+        }
 
+        int *largura = new int[COLUNAS]; // Vetor que armazenará a largura máxima de cada coluna para alinhar a exibição
+        memset(largura, 0, sizeof(int) * COLUNAS); // inicializa o vetor de larguras com zeros
+
+        for (int c = 0; c < COLUNAS; c++) { // Calcula a maior largura de texto em cada coluna
+            int maior = 0;
+            for (int l = 0; l < LINHAS; l++) { // Percorre todas as linhas da coluna atual
+                int pos = l * COLUNAS + c;
+                int sz = matriz[pos].size();
+                if (sz > maior) maior = sz;
+            }
+            largura[c] = maior + 4; // adiciona espaçamento extra para manter boa separação visual
+        }
+
+        for (int l = 0; l < LINHAS; l++) { // imprime linha por linha da matriz de arquivos
+            for (int c = 0; c < COLUNAS; c++) {
+                int pos = l * COLUNAS + c;
+                if (!matriz[pos].empty()) { // imprime apenas células com conteúdo
+                    cout << left << setw(largura[c]) << matriz[pos] << right;
+                }
+            }
+            cout << endl;
+        }
+
+        delete[] matriz; // libera memória alocada para a matriz de exibição
+        delete[] largura; // libera memória alocada para o vetor de larguras
+
+        cout << "\n0 - Voltar" << endl;
         cout << "Escolha: " << TXT_AMARELO;
         cin >> escolha;
         cout << TXT_BRANCO;
 
-
         if (escolha < 0 || escolha > melo.quantidade) {
             cout << TXT_VERMELHO << "\nOpção inválida!" << TXT_BRANCO << endl;
             limpar(2);
+
             return;
         }
 
-        if(escolha == 0){
-            voltar == false;
+        if (escolha == 0) {
+            voltar = true;
             limpar(1);
+
             return;
         }
 
-        // monta caminho completo
-        string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1];
+        string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1]; // monta o caminho completo do arquivo selecionado
 
-        // toca o arquivo usando o player padrão do sistema
-        string comando = "xdg-open \"" + caminhoCompleto + "\"";
-        system(comando.c_str());
+        string comando = "xdg-open \"" + caminhoCompleto + "\""; // monta o comando para abrir o arquivo com o programa padrão do sistema
+        system(comando.c_str()); // executa o comando que abre a melodia selecionada
     }
 }
 
-void abrir_diretorio(Melodias &dirInfo, const string &path) {
-    DIR *dir;
-    struct dirent *entrada;
+void abrir_diretorio(Melodias &dirInfo, const string &path) { // função que carrega arquivos de um diretório para a struct Melodias
+    DIR *dir; // ponteiro para o diretório que será aberto
+    struct dirent *entrada; // estrutura que representa cada item encontrado dentro do diretório
 
     dirInfo.caminho = path;
     dirInfo.quantidade = 0;
 
-    dir = opendir(path.c_str());
+    dir = opendir(path.c_str()); // tenta abrir o diretório especificado
     if (!dir) {
         cout << "Erro ao abrir o diretorio: " << path << endl;
         return;
     }
 
-    while ((entrada = readdir(dir)) != NULL) {
+    while ((entrada = readdir(dir)) != NULL) { // lê cada item encontrado no diretório
         const char *nome = entrada->d_name;
 
         if (strcmp(nome, ".") == 0 || strcmp(nome, "..") == 0)  // Ignora "." e ".."
             continue;
 
-        if (dirInfo.quantidade < 100) {
+        if (dirInfo.quantidade < 100) { // adiciona o nome do arquivo ao vetor caso ainda haja espaço disponível
             strcpy(dirInfo.arquivos[dirInfo.quantidade], nome);
             dirInfo.quantidade++;
         } else {
@@ -126,32 +164,31 @@ void abrir_diretorio(Melodias &dirInfo, const string &path) {
         }
     }
 
-    closedir(dir);
+    closedir(dir); // fecha o diretório após a leitura
 }
 
-void escolha_melodia(bool &voltar, int selecao){
-        Melodias toques;
+void escolha_melodia(bool &voltar, int selecao){ // gerencia a escolha de qual categoria de melodias será acessada
+    Melodias toques;
 
     switch (selecao){
 
         case 1: {
             PATH = "melodias/acordes-violao/";
-       
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
-            
             break;
         }
+
         case 2:
-           PATH = "melodias/notas-piano/";
-       
+            PATH = "melodias/notas-piano/";
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
-            
             break;
 
         case 3:
-            PATH = "/home/eller/Projects/projeto-C02/melodias/musica/";
+            PATH = "melodias/musica/";
+            abrir_diretorio(toques, PATH);
+            tocar_melodia(toques);
             break;
 
         case 0:
@@ -172,8 +209,8 @@ int pegar_ultimoID(){
     int idTemp;
     string nome, email, senha;
 
-    while(ARQ_LEITURA >> idTemp){
-        ARQ_LEITURA.ignore();
+    while(ARQ_LEITURA >> idTemp){ // lê o ID registrado no arquivo
+        ARQ_LEITURA.ignore(); // limpa o buffer para leitura de strings completas
         getline(ARQ_LEITURA, nome);
         getline(ARQ_LEITURA, email);
         getline(ARQ_LEITURA, senha);
@@ -183,14 +220,14 @@ int pegar_ultimoID(){
     return ultimoID + 1;
 }
 
-bool email_ja_existe(string emailProcurado){
+bool email_ja_existe(string emailProcurado){ // verifica se o email já está cadastrado no banco de usuários
     ARQ_LEITURA.open(USERS_DB, ofstream::in);
 
     int id;
     string nome, email, senha;
 
-    while(ARQ_LEITURA >> id){
-        ARQ_LEITURA.ignore();
+    while(ARQ_LEITURA >> id){ // lê o ID de cada usuário
+        ARQ_LEITURA.ignore(); // limpa o buffer para leitura de strings completas
         getline(ARQ_LEITURA, nome);
         getline(ARQ_LEITURA, email);
         getline(ARQ_LEITURA, senha);
@@ -200,10 +237,11 @@ bool email_ja_existe(string emailProcurado){
         }
     }
     ARQ_LEITURA.close();
+
     return false;
 }
 
-bool criar_conta(Usuarios users[], int &total){
+bool criar_conta(Usuarios users[], int &total){ // registra um novo usuário no sistema
     Usuarios usr;
 
     usr.id = pegar_ultimoID();
@@ -236,12 +274,13 @@ bool criar_conta(Usuarios users[], int &total){
     ARQ_ESCRITA << usr.nome << endl;
     ARQ_ESCRITA << usr.email << endl;
     ARQ_ESCRITA << usr.senha << endl;
+
     ARQ_ESCRITA.close();
 
     return true;
 }
 
-bool fazer_login(Usuarios users[], string &nomeFile){
+bool fazer_login(Usuarios users[], string &nomeFile){ // valida login do usuário verificando email e senha
     string email, senha;
 
     system("clear");
@@ -263,13 +302,15 @@ bool fazer_login(Usuarios users[], string &nomeFile){
         getline(ARQ_LEITURA, nomeFile);
         getline(ARQ_LEITURA, emailFile);
         getline(ARQ_LEITURA, senhaFile);
-        if(emailFile == email && senhaFile == senha){
+
+        if(emailFile == email && senhaFile == senha){ // Verifica se Email e Senha batem
             ARQ_LEITURA.close();
-            cout << TXT_VERDE << "\nLogin efetuado com " << TXT_VERDE << "sucesso!" << TXT_BRANCO << endl;
+            cout << TXT_VERDE << "\nLogin efetuado com sucesso!" << TXT_BRANCO << endl;
 
             return true;
         }
     }
+
     ARQ_LEITURA.close();
 
     return false;
@@ -314,7 +355,7 @@ int main(){
                     cout << "1 - Acordes de violão" << endl;
                     cout << "2 - Notas de piano" << endl;
                     cout << "3 - musicas" << endl;
-                    cout << "0 - Sair " << TXT_AMARELO << endl;
+                    cout << "0 - Voltar " << TXT_AMARELO << endl;
                     cout << TXT_BRANCO << "Escolha: " << TXT_AMARELO;
                     cin >> selecao;
                     cout << "\n" << TXT_BRANCO;
