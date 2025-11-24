@@ -1,4 +1,12 @@
-124
-cas
+1
 ca
+cas
+123
+2
+caac
+cass
+123
+3
+caca
+cacac
 123

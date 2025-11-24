@@ -72,10 +72,3 @@ O programa possui autenticação simples com **login** e **criação de conta**,
 │   └── musica/
 ├── output/         # Diretório opcional para o executável
 └── README.md       # Documentação do projeto
-
-   === BEM VINDO AO MELOMIX ===   
-
-1 - Fazer login
-2 - Criar conta
-0 - Sair
-Escolha: 1

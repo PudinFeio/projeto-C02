@@ -1,33 +1,32 @@
 // BIBLIOTECAS //
-#include <iostream> // Entrada e saida de dados
-#include <iomanip> // Manipulador de entrada e saída de dados
-#include <string>   // Tipo string
-#include <fstream> // Leitura e escrita de arquivos
-#include <unistd.h> // Fornece o sleep() e outras funções para interação com o terminal
-#include <cstdlib> // Permite enviar comandos para o terminal através do system()
-#include <dirent.h> // Interação com diretórios
-#include <cstring> // Manipulador de Strings
-#include <sys/types.h> // Biblioteca C que define tipos de dados usados pelo sistema operacional Linux/mac
+#include <iostream> // cout, cin, endl — manipulação de entrada e saída de dados via streams
+#include <iomanip>  // setw — manipulação de layout/tabulação de saída
+#include <string>   // std::string — manipulação de strings dinâmicas
+#include <fstream>  // ifstream/ofstream — leitura e escrita de arquivos
+#include <unistd.h> // sleep() — pausa a execução por n segundos
+#include <cstdlib>  // system() — executa comandos do shell, exit() — encerra o programa
+#include <dirent.h> // DIR, struct dirent, opendir/readdir/closedir — manipulação de diretórios POSIX
+#include <cstring>  // strcpy, strcmp, memset — manipulação de C-strings
+#include <sys/types.h> // typedefs de tipos do sistema usados por dirent.h
 
 using namespace std;
 
-// CORES UNIX //
+// CORES TERMINAL
 #define TXT_VERMELHO "\033[31m"
-#define TXT_BRANCO "\033[0m"
-#define TXT_VERDE "\033[32m"
-#define TXT_AMARELO "\033[33m"
-#define TXT_AZUL "\033[34m"
+#define TXT_BRANCO   "\033[0m"
+#define TXT_VERDE    "\033[32m"
+#define TXT_AMARELO  "\033[33m"
+#define TXT_AZUL     "\033[34m"
 
-// GLOBAIS //
-ofstream ARQ_ESCRITA;
-ifstream ARQ_LEITURA;
-
+// VARIÁVEIS GLOBAIS
+ofstream ARQ_ESCRITA; // objeto para escrita em arquivos
+ifstream ARQ_LEITURA; // objeto para leitura de arquivos
 const int TAM_VETOR_USERS = 100;
 const int MAX_NOTAS = 26;
 const string USERS_DB  = "usuarios.txt";
 string PATH;
 
-// STRUCTS //
+// ESTRUTURAS
 struct Usuarios {
     int id;
     string nome;
@@ -41,122 +40,114 @@ struct Melodias {
     int quantidade;
 };
 
-// FUNÇÕES EXISTENTES //
+// FUNÇÕES UTILITÁRIAS
 void limpar(int a) {
-    sleep(a);
-    system("clear");
+    sleep(a);          // sleep() do unistd.h pausa a execução do programa por 'a' segundos
+    system("clear");   // system() do cstdlib executa o comando "clear" no terminal
 }
 
-// TOCAR MÚSICA //
+// TOCAR MÚSICA
 void tocar_melodia(Melodias melo) {
     int escolha;
     bool voltar = false;
-
     const int LINHAS = 8;
 
     while (!voltar) {
         limpar(1);
 
         if (melo.quantidade == 0) {
-            cout << "Nenhum arquivo encontrado!" << endl;
+            cout << "Nenhum arquivo encontrado!" << endl; // cout do iostream imprime texto no terminal
             return;
         }
 
         cout << "\n   === Digite um dos números para reproduzir a melodia ===   \n\n";
 
-        int total = melo.quantidade; // Armazena o total de arquivos encontrados no diretório
-        int COLUNAS = (total + LINHAS - 1) / LINHAS; // calcula quantas colunas serão necessárias para distribuir os arquivos igualmente
+        int total = melo.quantidade;
+        int COLUNAS = (total + LINHAS - 1) / LINHAS;
 
-        string *matriz = new string[LINHAS * COLUNAS]; // Cria dinamicamente uma matriz unidimensional que representará a grade de arquivos exibidos
+        string matriz[LINHAS * COLUNAS]; // std::string do string.h armazena nomes de arquivos
 
         int index = 0;
-
-        for (int c = 0; c < COLUNAS; c++) { // Percorre cada coluna para preencher a matriz visual com os nomes dos arquivos
+        for (int c = 0; c < COLUNAS; c++) {
             for (int l = 0; l < LINHAS; l++) {
                 int pos = l * COLUNAS + c;
-
-                if (index < total) { // Verifica se ainda há arquivos para serem listados
-                    matriz[pos] = to_string(index + 1) + " - " + melo.arquivos[index];
+                if (index < total) {
+                    matriz[pos] = to_string(index + 1) + " - " + melo.arquivos[index]; // to_string converte int para string
                     index++;
                 } else {
-                    matriz[pos] = ""; // Insere espaço vazio caso não haja mais arquivos disponíveis para preencher a grade
+                    matriz[pos] = "";
                 }
             }
         }
 
-        int *largura = new int[COLUNAS]; // Vetor que armazenará a largura máxima de cada coluna para alinhar a exibição
-        memset(largura, 0, sizeof(int) * COLUNAS); // inicializa o vetor de larguras com zeros
+        int largura[COLUNAS];
+        memset(largura, 0, sizeof(largura)); // memset do cstring zera todos os bytes do array
 
-        for (int c = 0; c < COLUNAS; c++) { // Calcula a maior largura de texto em cada coluna
+        for (int c = 0; c < COLUNAS; c++) {
             int maior = 0;
-            for (int l = 0; l < LINHAS; l++) { // Percorre todas as linhas da coluna atual
+            for (int l = 0; l < LINHAS; l++) {
                 int pos = l * COLUNAS + c;
-                int sz = matriz[pos].size();
+                int sz = matriz[pos].size(); // size() do string retorna o tamanho da string
                 if (sz > maior) maior = sz;
             }
-            largura[c] = maior + 4; // adiciona espaçamento extra para manter boa separação visual
+            largura[c] = maior + 4;
         }
 
-        for (int l = 0; l < LINHAS; l++) { // imprime linha por linha da matriz de arquivos
+        for (int l = 0; l < LINHAS; l++) {
             for (int c = 0; c < COLUNAS; c++) {
                 int pos = l * COLUNAS + c;
-                if (!matriz[pos].empty()) { // imprime apenas células com conteúdo
-                    cout << left << setw(largura[c]) << matriz[pos] << right;
+                if (!matriz[pos].empty()) {
+                    cout << left << setw(largura[c]) << matriz[pos] << right; 
+                    // setw() do iomanip define largura de campo; left/right alinham à esquerda/direita
                 }
             }
             cout << endl;
         }
 
-        delete[] matriz; // libera memória alocada para a matriz de exibição
-        delete[] largura; // libera memória alocada para o vetor de larguras
-
         cout << "\n0 - Voltar" << endl;
         cout << "Escolha: " << TXT_AMARELO;
-        cin >> escolha;
+        cin >> escolha; // cin do iostream lê entrada do usuário
         cout << TXT_BRANCO;
 
         if (escolha < 0 || escolha > melo.quantidade) {
             cout << TXT_VERMELHO << "\nOpção inválida!" << TXT_BRANCO << endl;
             limpar(2);
-
             return;
         }
 
         if (escolha == 0) {
             voltar = true;
             limpar(1);
-
             return;
         }
 
-        string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1]; // monta o caminho completo do arquivo selecionado
-
-        string comando = "xdg-open \"" + caminhoCompleto + "\""; // monta o comando para abrir o arquivo com o programa padrão do sistema
-        system(comando.c_str()); // executa o comando que abre a melodia selecionada
+        string caminhoCompleto = melo.caminho + melo.arquivos[escolha - 1];
+        string comando = "xdg-open \"" + caminhoCompleto + "\"";
+        system(comando.c_str()); // c_str() converte string para const char* exigido pelo system()
     }
 }
 
-void abrir_diretorio(Melodias &dirInfo, const string &path) { // função que carrega arquivos de um diretório para a struct Melodias
-    DIR *dir; // ponteiro para o diretório que será aberto
-    struct dirent *entrada; // estrutura que representa cada item encontrado dentro do diretório
+// ABRIR DIRETÓRIO
+void abrir_diretorio(Melodias &dirInfo, const string &path) {
+    DIR *dir;                 // DIR da dirent.h representa um diretório aberto
+    struct dirent *entrada;   // struct dirent da dirent.h representa um arquivo dentro do diretório
 
     dirInfo.caminho = path;
     dirInfo.quantidade = 0;
 
-    dir = opendir(path.c_str()); // tenta abrir o diretório especificado
+    dir = opendir(path.c_str()); // opendir abre diretório; c_str converte string para const char*
     if (!dir) {
         cout << "Erro ao abrir o diretorio: " << path << endl;
         return;
     }
 
-    while ((entrada = readdir(dir)) != NULL) { // lê cada item encontrado no diretório
+    while ((entrada = readdir(dir)) != NULL) { // readdir retorna cada item do diretório
         const char *nome = entrada->d_name;
-
-        if (strcmp(nome, ".") == 0 || strcmp(nome, "..") == 0)  // Ignora "." e ".."
+        if (strcmp(nome, ".") == 0 || strcmp(nome, "..") == 0) // strcmp compara C-strings
             continue;
 
-        if (dirInfo.quantidade < 100) { // adiciona o nome do arquivo ao vetor caso ainda haja espaço disponível
-            strcpy(dirInfo.arquivos[dirInfo.quantidade], nome);
+        if (dirInfo.quantidade < 100) {
+            strcpy(dirInfo.arquivos[dirInfo.quantidade], nome); // strcpy copia C-string
             dirInfo.quantidade++;
         } else {
             cout << "Limite de arquivos atingido!" << endl;
@@ -164,70 +155,65 @@ void abrir_diretorio(Melodias &dirInfo, const string &path) { // função que ca
         }
     }
 
-    closedir(dir); // fecha o diretório após a leitura
+    closedir(dir); // closedir fecha o diretório
 }
 
-void escolha_melodia(bool &voltar, int selecao){ // gerencia a escolha de qual categoria de melodias será acessada
+// ESCOLHA DE MELODIA
+void escolha_melodia(bool &voltar, int selecao) {
     Melodias toques;
 
     switch (selecao){
-
-        case 1: {
+        case 1:
             PATH = "melodias/acordes-violao/";
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
             break;
-        }
-
         case 2:
             PATH = "melodias/notas-piano/";
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
             break;
-
         case 3:
             PATH = "melodias/musica/";
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
             break;
-
         case 0:
             voltar = true;
             break;
-
         default:
             cout << TXT_VERMELHO << "Opção inválida!" << TXT_BRANCO << endl;
             limpar(2);
     }
 }
 
-// CRUD //
+// FUNÇÕES CRUD DE USUÁRIOS
 int pegar_ultimoID(){
-    ARQ_LEITURA.open(USERS_DB, ofstream::in);
+    ARQ_LEITURA.open(USERS_DB, ofstream::in); // open() do fstream abre arquivo para leitura
 
     int ultimoID = 0;
     int idTemp;
     string nome, email, senha;
 
-    while(ARQ_LEITURA >> idTemp){ // lê o ID registrado no arquivo
-        ARQ_LEITURA.ignore(); // limpa o buffer para leitura de strings completas
-        getline(ARQ_LEITURA, nome);
+    while(ARQ_LEITURA >> idTemp){ // >> lê valor do arquivo para idTemp
+        ARQ_LEITURA.ignore();     // ignore() descarta o '\n' após leitura do int
+        getline(ARQ_LEITURA, nome);  // getline() do iostream lê linha inteira
         getline(ARQ_LEITURA, email);
         getline(ARQ_LEITURA, senha);
         ultimoID = idTemp;
     }
-    ARQ_LEITURA.close();
+    ARQ_LEITURA.close(); // fecha arquivo
     return ultimoID + 1;
 }
 
-bool email_ja_existe(string emailProcurado){ // verifica se o email já está cadastrado no banco de usuários
+bool email_ja_existe(string emailProcurado){
     ARQ_LEITURA.open(USERS_DB, ofstream::in);
 
     int id;
     string nome, email, senha;
 
-    while(ARQ_LEITURA >> id){ // lê o ID de cada usuário
-        ARQ_LEITURA.ignore(); // limpa o buffer para leitura de strings completas
+    while(ARQ_LEITURA >> id){
+        ARQ_LEITURA.ignore();
         getline(ARQ_LEITURA, nome);
         getline(ARQ_LEITURA, email);
         getline(ARQ_LEITURA, senha);
@@ -237,16 +223,14 @@ bool email_ja_existe(string emailProcurado){ // verifica se o email já está ca
         }
     }
     ARQ_LEITURA.close();
-
     return false;
 }
 
-bool criar_conta(Usuarios users[], int &total){ // registra um novo usuário no sistema
+bool criar_conta(Usuarios users[], int &total){
     Usuarios usr;
-
     usr.id = pegar_ultimoID();
 
-    system("clear");
+    system("clear"); // limpa terminal
 
     cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
     cout << "\nCrie sua conta" << endl;
@@ -269,20 +253,18 @@ bool criar_conta(Usuarios users[], int &total){ // registra um novo usuário no 
     users[total] = usr;
     total++;
 
-    ARQ_ESCRITA.open(USERS_DB, ofstream::out);
-    ARQ_ESCRITA << usr.id << endl;
+    ARQ_ESCRITA.open(USERS_DB, ofstream::out | ofstream::app); // abre arquivo em append
+    ARQ_ESCRITA << usr.id << endl;    // << do fstream escreve dados no arquivo
     ARQ_ESCRITA << usr.nome << endl;
     ARQ_ESCRITA << usr.email << endl;
     ARQ_ESCRITA << usr.senha << endl;
-
     ARQ_ESCRITA.close();
 
     return true;
 }
 
-bool fazer_login(Usuarios users[], string &nomeFile){ // valida login do usuário verificando email e senha
+bool fazer_login(Usuarios users[], string &nomeFile){
     string email, senha;
-
     system("clear");
 
     cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
@@ -292,7 +274,8 @@ bool fazer_login(Usuarios users[], string &nomeFile){ // valida login do usuári
     cout << TXT_BRANCO;
     cout << "Senha: " << TXT_AMARELO;
     getline(cin, senha);
-    ARQ_LEITURA.open("usuarios.txt");
+
+    ARQ_LEITURA.open(USERS_DB);
 
     int idFile;
     string emailFile, senhaFile;
@@ -303,34 +286,26 @@ bool fazer_login(Usuarios users[], string &nomeFile){ // valida login do usuári
         getline(ARQ_LEITURA, emailFile);
         getline(ARQ_LEITURA, senhaFile);
 
-        if(emailFile == email && senhaFile == senha){ // Verifica se Email e Senha batem
+        if(emailFile == email && senhaFile == senha){
             ARQ_LEITURA.close();
             cout << TXT_VERDE << "\nLogin efetuado com sucesso!" << TXT_BRANCO << endl;
-
             return true;
         }
     }
 
     ARQ_LEITURA.close();
-
     return false;
 }
 
-// MAIN //
+// MAIN
 int main(){
-
     bool desligar = false; 
     int escolhaLogin;
     string nomeUser;
-
     Usuarios users[TAM_VETOR_USERS];
     int totalUsers = 0;
 
-    system("clear");
-
-    const string pastaAcordes = "acordes-violao";
-    string arquivos[MAX_NOTAS];
-    string nomes[MAX_NOTAS];
+    system("clear"); // limpa terminal
 
     while(!desligar){
         cout << "\n   === BEM VINDO AO MELOMIX ===   " << endl;
@@ -340,66 +315,55 @@ int main(){
         cout << "Escolha: " << TXT_AMARELO;
         cin >> escolhaLogin;
         cout << "\n" << TXT_BRANCO;
-        cin.ignore();
+        cin.ignore(); // descarta '\n' do buffer de entrada
 
         switch (escolhaLogin){
+            case 1:
+                if(fazer_login(users, nomeUser)){
+                    limpar(1);
+                    bool voltar = false;
+                    while (!voltar ){
+                        int selecao;
+                        cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
+                        cout << "1 - Acordes de violão" << endl;
+                        cout << "2 - Notas de piano" << endl;
+                        cout << "3 - musicas" << endl;
+                        cout << "0 - Voltar " << TXT_AMARELO << endl;
+                        cout << TXT_BRANCO << "Escolha: " << TXT_AMARELO;
+                        cin >> selecao;
+                        cout << "\n" << TXT_BRANCO;
+                        cin.ignore();
 
-        case 1:
-            if(fazer_login(users, nomeUser)){
-                limpar(1);
-                bool voltar = false;
-
-                while (!voltar ){
-                    int selecao;
-                    cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
-                    cout << "1 - Acordes de violão" << endl;
-                    cout << "2 - Notas de piano" << endl;
-                    cout << "3 - musicas" << endl;
-                    cout << "0 - Voltar " << TXT_AMARELO << endl;
-                    cout << TXT_BRANCO << "Escolha: " << TXT_AMARELO;
-                    cin >> selecao;
-                    cout << "\n" << TXT_BRANCO;
-                    cin.ignore();
-
-                    if(selecao < 1){
-                        limpar(1);
-                        break;
+                        if(selecao < 1){
+                            limpar(1);
+                            break;
+                        }
+                        escolha_melodia(voltar, selecao);
                     }
-                    escolha_melodia(voltar, selecao);
+                } else {
+                    cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
+                    limpar(2);
                 }
-
-            } else {
-                cout << TXT_VERMELHO << "\nFalha no login!" << TXT_BRANCO << endl;
+                break;
+            case 2:
+                if(criar_conta(users, totalUsers)){
+                    cout << TXT_VERDE << "\nConta criada com sucesso!" << TXT_BRANCO << endl;
+                    limpar(2);
+                } else {
+                    cout << TXT_VERMELHO << "\nErro ao criar conta!" << TXT_BRANCO << endl;
+                    limpar(2);
+                }
+                break;
+            case 0:
+                cout << TXT_AMARELO <<" Saindo..." << TXT_BRANCO << endl;
+                desligar = true;
+                limpar(1);
+                break;
+            default:
+                cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
                 limpar(2);
                 break;
-            }
-
-            break;
-
-        case 2:
-            if(criar_conta(users, totalUsers)){
-                cout << TXT_VERDE << "\nConta criada com sucesso!" << TXT_BRANCO << endl;
-                limpar(2);
-            } else {
-                cout << TXT_VERMELHO << "\nErro ao criar conta!" << TXT_BRANCO << endl;
-                limpar(2);
-                break;
-            }
-
-            break;
-
-        case 0:
-            cout << TXT_AMARELO <<" Saindo..." << TXT_BRANCO << endl;
-            desligar = true;
-            limpar(1);
-            break;
-
-        default:
-            cout << TXT_VERMELHO <<"Opção inválida!" << TXT_BRANCO << endl;
-            limpar(2);
-            break;
         }
-    
     }
 
     return 0;
