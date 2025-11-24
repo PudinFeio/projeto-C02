@@ -172,11 +172,6 @@ void escolha_melodia(bool &voltar, int selecao) {
             abrir_diretorio(toques, PATH);
             tocar_melodia(toques);
             break;
-        case 3:
-            PATH = "melodias/musica/";
-            abrir_diretorio(toques, PATH);
-            tocar_melodia(toques);
-            break;
         case 0:
             voltar = true;
             break;
@@ -326,7 +321,6 @@ int main(){
                         cout << TXT_BRANCO "\n   === Bem vindo ao MeloMix " << TXT_AMARELO << nomeUser << TXT_BRANCO << " ===   \n" << endl;
                         cout << "1 - Acordes de violão" << endl;
                         cout << "2 - Notas de piano" << endl;
-                        cout << "3 - musicas" << endl;
                         cout << "0 - Voltar " << TXT_AMARELO << endl;
                         cout << TXT_BRANCO << "Escolha: " << TXT_AMARELO;
                         cin >> selecao;

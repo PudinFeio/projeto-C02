@@ -68,7 +68,6 @@ O programa possui autenticação simples com **login** e **criação de conta**,
 ├── usuarios.txt    # Arquivo de armazenamento de dados (gerado automaticamente)
 ├── melodias/       # Diretórios de melodias e partituras
 │   ├── acordes-violao/
-│   ├── notas-piano/
-│   └── musica/
+│   └──notas-piano/
 ├── output/         # Diretório opcional para o executável
 └── README.md       # Documentação do projeto
